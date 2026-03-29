@@ -1,0 +1,40 @@
+name: Amundson Framework Verification
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install mpmath
+        run: pip install mpmath
+
+      - name: Run core verification suite
+        run: python3 scripts/verify.py
+
+      - name: Run road verification suite
+        run: python3 scripts/verify_road.py
+
+      - name: Verify algebraic identities
+        run: python3 identities/01-algebraic.py
+
+      - name: Verify product identities
+        run: python3 identities/02-products.py
+
+      - name: Verify calculus identities
+        run: python3 identities/03-calculus.py
+
+      - name: Verify asymptotic identities
+        run: python3 identities/04-asymptotic.py
