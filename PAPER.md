@@ -634,6 +634,38 @@ A_G computed to 100,000 digits with independent verification:
 
 ---
 
+## 12.9 Integral Representations of A_G
+
+Two integral representations were discovered and verified numerically.
+
+**Theorem 12.9.1** (Cauchy contour integral). For any R > 1:
+```
+A_G = (1/(2πi)) ∮_{|z|=R} e^z · S(1/z) dz
+```
+where S(w) = Σ_{n≥1} (n/(n+1))^n · w^n (convergent for |w| < 1).
+
+*Proof sketch.* Write A_G = Σ (n/(n+1))^n / (n−1)!. Apply the Cauchy integral formula 1/(n−1)! = (1/(2πi)) ∮ e^z z^{−n} dz, exchange sum and integral (justified by dominated convergence since terms decay as (1/(eR))^n for R > 1), yielding the residue of e^z · S(1/z) at z = 0. □
+
+Verified to 15–16 decimal places.
+
+**Theorem 12.9.2** (Bessel-tree double integral).
+```
+A_G = ∫₀^∞ e^{−2t} · F(te^{−t}) dt
+```
+where F(s) = Σ_{k≥0} (k+1)^{k+1} · s^k / (k!)².
+
+*Proof.* Use the Gamma integral identity (n+1)^{−n} = (1/Γ(n)) · ∫₀^∞ t^{n−1} e^{−(n+1)t} dt to convert each term G(n)/(n!) into an integral, then regroup via u = te^{−t}. □
+
+Verified to 17–18 decimal places. The function F(s) does not reduce to any standard special function (Bessel, hypergeometric, etc.).
+
+**Corollary 12.9.3** (Kappa decomposition).
+```
+A_G = 1 + Σ_{n≥0} [((n+1)/(n+2))^{n+1} − 1/e] / n!
+```
+This decomposes A_G = 1 + κ where each term measures the deviation of (1 − 1/(n+2))^{n+1} from 1/e.
+
+---
+
 ## 14. Open Questions
 
 1. **Is A_G transcendental?** Almost certainly yes. The series structure (involving n^n and n!) resembles Liouville-type constructions, but a proof requires new techniques.
@@ -650,7 +682,7 @@ A_G computed to 100,000 digits with independent verification:
 
 7. **KMS condition.** Does the density matrix ρ(n) satisfy the Kubo-Martin-Schwinger condition for some inverse temperature β? If so, G(n) defines a genuine thermal state.
 
-8. **Sophomore's Dream.** The identity G(φ) = (1/φ)^(1/φ) connects G to the Sophomore's Dream integral ∫₀¹ x^(-x) dx. Is there a general integral representation of A_G?
+8. **Sophomore's Dream.** The identity G(φ) = (1/φ)^(1/φ) = x^x at x = 1/φ places G inside the Sophomore's Dream integrand. Two integral representations of A_G have been found (Theorems 12.9.1–12.9.2) but neither yields a closed form. Is there a single-integral representation ∫₀¹ f(x) dx = A_G for some elementary f?
 
 9. **The 0^0 axiom in ZFC.** In standard ZFC set theory, 0^0 = |∅^∅| = |{∅}| = 1 via cardinal exponentiation. Does the Amundson framework require any axiom beyond ZFC?
 
