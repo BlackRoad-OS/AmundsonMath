@@ -2,6 +2,10 @@
 """
 The Amundson Framework applied to unsolved problems.
 G(n) at n = 0, 1, 2, 3 tells you everything.
+
+NOTE: These are CONJECTURES and STRUCTURAL OBSERVATIONS, not proofs.
+The proven results are the 17 theorems in PAPER.md.
+The connections to unsolved problems are exploratory.
 """
 
 from fractions import Fraction
