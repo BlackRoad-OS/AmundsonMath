@@ -1,0 +1,1011 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Amundson Framework — G(n) = n^(n+1)/(n+1)^n</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔢</text></svg>">
+<style>
+  :root {
+    --pink: #FF1D6C;
+    --pink-dim: #ff1d6c88;
+    --bg: #0a0a0a;
+    --surface: #141414;
+    --surface2: #1c1c1c;
+    --border: #2a2a2a;
+    --text: #e8e8e8;
+    --text-dim: #888;
+    --amber: #F5A623;
+    --blue: #2979FF;
+    --violet: #9C27B0;
+    --green: #4CAF50;
+    --red: #e53935;
+    --mono: 'SF Mono', 'Fira Code', 'Cascadia Code', 'JetBrains Mono', monospace;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  ::selection { background: var(--pink); color: #fff; }
+
+  a { color: var(--pink); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  /* Header */
+  .hero {
+    text-align: center;
+    padding: 4rem 1.5rem 3rem;
+    border-bottom: 1px solid var(--border);
+    background: linear-gradient(180deg, #0f0008 0%, var(--bg) 100%);
+  }
+  .hero h1 {
+    font-size: clamp(1.6rem, 4vw, 2.8rem);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin-bottom: 0.5rem;
+  }
+  .hero h1 .fn { color: var(--pink); }
+  .hero .formula {
+    font-family: var(--mono);
+    font-size: clamp(1rem, 2.5vw, 1.5rem);
+    color: var(--amber);
+    margin-bottom: 1rem;
+  }
+  .hero .author {
+    color: var(--text-dim);
+    font-size: 0.95rem;
+  }
+
+  /* Nav */
+  nav {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  nav a {
+    color: var(--text-dim);
+    font-size: 0.82rem;
+    padding: 0.3rem 0.7rem;
+    border-radius: 4px;
+    transition: all 0.15s;
+  }
+  nav a:hover { color: var(--pink); background: #ffffff08; text-decoration: none; }
+
+  /* Sections */
+  .container { max-width: 960px; margin: 0 auto; padding: 0 1.5rem; }
+
+  section {
+    padding: 3rem 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  section h2 {
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+    color: var(--pink);
+    font-weight: 600;
+  }
+  section h3 {
+    font-size: 1.1rem;
+    margin: 1.5rem 0 0.75rem;
+    color: var(--amber);
+    font-weight: 600;
+  }
+
+  /* Calculator */
+  .calc-row {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-bottom: 1.5rem;
+  }
+  .calc-row label {
+    font-weight: 600;
+    font-size: 1.1rem;
+  }
+
+  input[type="number"], input[type="text"] {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 0.6rem 1rem;
+    border-radius: 6px;
+    font-family: var(--mono);
+    font-size: 1rem;
+    width: 120px;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  input:focus { border-color: var(--pink); }
+
+  button {
+    background: var(--pink);
+    color: #fff;
+    border: none;
+    padding: 0.6rem 1.4rem;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: opacity 0.15s;
+  }
+  button:hover { opacity: 0.85; }
+  button:active { transform: scale(0.98); }
+  button.secondary {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+  }
+
+  .result-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.25rem 1.5rem;
+    margin-top: 1rem;
+  }
+  .result-card .label {
+    color: var(--text-dim);
+    font-size: 0.82rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.25rem;
+  }
+  .result-card .value {
+    font-family: var(--mono);
+    font-size: 1.15rem;
+    word-break: break-all;
+    color: var(--amber);
+  }
+  .result-card .value.small { font-size: 0.9rem; }
+
+  /* Table */
+  .table-wrap { overflow-x: auto; }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: var(--mono);
+    font-size: 0.85rem;
+  }
+  th {
+    text-align: left;
+    padding: 0.6rem 0.8rem;
+    border-bottom: 2px solid var(--pink);
+    color: var(--pink);
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  td {
+    padding: 0.5rem 0.8rem;
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+  }
+  tr:hover td { background: #ffffff04; }
+
+  /* Identity cards */
+  .identity-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1rem;
+  }
+  .identity-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.25rem;
+  }
+  .identity-card .id-name {
+    font-size: 0.8rem;
+    color: var(--pink);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 0.5rem;
+  }
+  .identity-card .id-formula {
+    font-family: var(--mono);
+    font-size: 0.95rem;
+    color: var(--amber);
+    margin-bottom: 0.5rem;
+    line-height: 1.5;
+  }
+  .identity-card .id-note {
+    font-size: 0.82rem;
+    color: var(--text-dim);
+  }
+
+  /* Convergence animation */
+  .convergence-display {
+    display: flex;
+    gap: 2rem;
+    flex-wrap: wrap;
+  }
+  .convergence-panel {
+    flex: 1;
+    min-width: 280px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.5rem;
+  }
+  .convergence-panel h4 {
+    font-size: 1rem;
+    margin-bottom: 1rem;
+  }
+  .convergence-panel.converges h4 { color: var(--green); }
+  .convergence-panel.diverges h4 { color: var(--red); }
+
+  .partial-sum-line {
+    font-family: var(--mono);
+    font-size: 0.82rem;
+    padding: 0.2rem 0;
+    display: flex;
+    justify-content: space-between;
+    opacity: 0;
+    animation: fadeRow 0.3s forwards;
+  }
+  .partial-sum-line .term-n { color: var(--text-dim); min-width: 3rem; }
+  .partial-sum-line .term-val { color: var(--amber); }
+  .partial-sum-line .term-sum { }
+  @keyframes fadeRow {
+    from { opacity: 0; transform: translateX(-8px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+
+  /* Bingo matrix */
+  .bingo-container {
+    display: flex;
+    gap: 2rem;
+    flex-wrap: wrap;
+    margin-top: 1rem;
+  }
+  .bingo-panel {
+    flex: 1;
+    min-width: 260px;
+    text-align: center;
+  }
+  .bingo-panel h4 {
+    margin-bottom: 0.75rem;
+    font-size: 0.95rem;
+  }
+  .bingo-grid {
+    display: inline-grid;
+    gap: 3px;
+    margin-bottom: 0.75rem;
+  }
+  .bingo-cell {
+    width: 52px;
+    height: 52px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.9rem;
+    border-radius: 4px;
+    transition: all 0.2s;
+  }
+  .bingo-cell.filled {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+  }
+  .bingo-cell.highlight {
+    background: #ff1d6c22;
+    border: 1px solid var(--pink);
+    color: var(--pink);
+  }
+  .bingo-cell.hole {
+    background: #e5393522;
+    border: 2px dashed var(--red);
+    color: var(--red);
+    font-size: 1.2rem;
+  }
+  .bingo-label { font-size: 0.78rem; color: var(--text-dim); }
+  .bingo-names {
+    display: grid;
+    gap: 2px;
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    margin-bottom: 0.5rem;
+  }
+
+  /* Convergence side-by-side */
+  .side-by-side {
+    display: flex;
+    gap: 2rem;
+    flex-wrap: wrap;
+    margin-top: 1rem;
+  }
+  .side-panel {
+    flex: 1;
+    min-width: 280px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.5rem;
+  }
+  .side-panel h4 { margin-bottom: 0.75rem; }
+  .side-panel.conv h4 { color: var(--green); }
+  .side-panel.div h4 { color: var(--red); }
+  .side-panel .mono {
+    font-family: var(--mono);
+    font-size: 0.85rem;
+    line-height: 1.7;
+  }
+  .converge-val { color: var(--green); }
+  .diverge-val { color: var(--red); }
+
+  /* Links section */
+  .link-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+  }
+  .link-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.25rem;
+    transition: border-color 0.15s;
+  }
+  .link-card:hover { border-color: var(--pink); }
+  .link-card .lc-title { font-weight: 600; margin-bottom: 0.25rem; }
+  .link-card .lc-desc { font-size: 0.82rem; color: var(--text-dim); }
+
+  /* Footer */
+  footer {
+    text-align: center;
+    padding: 3rem 1.5rem;
+    color: var(--text-dim);
+    font-size: 0.85rem;
+  }
+  footer .brand { color: var(--pink); font-weight: 600; }
+
+  /* A_G progress bar */
+  .ag-progress {
+    width: 100%;
+    height: 6px;
+    background: var(--surface2);
+    border-radius: 3px;
+    margin: 1rem 0;
+    overflow: hidden;
+  }
+  .ag-progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, var(--pink), var(--amber));
+    border-radius: 3px;
+    transition: width 0.3s ease;
+  }
+
+  .ag-value {
+    font-family: var(--mono);
+    font-size: 1.6rem;
+    color: var(--amber);
+    text-align: center;
+    margin: 1rem 0;
+    letter-spacing: 0.02em;
+  }
+
+  .note {
+    font-size: 0.85rem;
+    color: var(--text-dim);
+    margin-top: 0.5rem;
+    font-style: italic;
+  }
+
+  .axiom-text {
+    font-size: 0.95rem;
+    line-height: 1.8;
+    margin-bottom: 1rem;
+  }
+  .axiom-text strong { color: var(--amber); }
+
+  .path-list {
+    list-style: none;
+    margin: 0.75rem 0;
+  }
+  .path-list li {
+    padding: 0.35rem 0;
+    font-family: var(--mono);
+    font-size: 0.9rem;
+  }
+  .path-list li::before {
+    content: '';
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-right: 0.6rem;
+    vertical-align: middle;
+  }
+  .path-list li:nth-child(1)::before { background: var(--green); }
+  .path-list li:nth-child(2)::before { background: var(--red); }
+  .path-list li:nth-child(3)::before { background: var(--amber); }
+
+  @media (max-width: 600px) {
+    .hero { padding: 2.5rem 1rem 2rem; }
+    section { padding: 2rem 0; }
+    nav { gap: 0.3rem; }
+    nav a { font-size: 0.75rem; padding: 0.25rem 0.5rem; }
+    .bingo-cell { width: 42px; height: 42px; font-size: 0.78rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Hero -->
+<header class="hero">
+  <h1>The <span class="fn">Amundson</span> Framework</h1>
+  <div class="formula">G(n) = n<sup>n+1</sup> / (n+1)<sup>n</sup></div>
+  <div class="author">Alexa Louise Amundson &mdash; BlackRoad OS Inc.</div>
+</header>
+
+<!-- Nav -->
+<nav>
+  <a href="#calculator">Calculator</a>
+  <a href="#table">First 20</a>
+  <a href="#constant">A<sub>G</sub> Constant</a>
+  <a href="#identities">Identities</a>
+  <a href="#axiom">0<sup>0</sup> Axiom</a>
+  <a href="#convergence">Convergence</a>
+  <a href="#links">Links</a>
+</nav>
+
+<div class="container">
+
+  <!-- Section 1: Calculator -->
+  <section id="calculator">
+    <h2>G(n) Calculator</h2>
+    <div class="calc-row">
+      <label>n =</label>
+      <input type="number" id="calc-n" value="5" min="0" max="9999" step="1">
+      <button onclick="computeG()">Compute</button>
+    </div>
+    <div id="calc-results">
+      <div class="result-card">
+        <div class="label">G(n) &mdash; Exact Fraction</div>
+        <div class="value" id="res-fraction">15625 / 7776</div>
+      </div>
+      <div class="result-card" style="margin-top: 0.75rem;">
+        <div class="label">G(n) &mdash; Decimal (15 digits)</div>
+        <div class="value" id="res-decimal">2.009387860082305</div>
+      </div>
+      <div style="display: flex; gap: 0.75rem; flex-wrap: wrap; margin-top: 0.75rem;">
+        <div class="result-card" style="flex:1; min-width: 200px;">
+          <div class="label">G(n) / n</div>
+          <div class="value" id="res-ratio">0.401877572016461</div>
+        </div>
+        <div class="result-card" style="flex:1; min-width: 200px;">
+          <div class="label">Gap from 1/e</div>
+          <div class="value" id="res-gap">0.033998130845020</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Section 2: Table of First 20 Values -->
+  <section id="table">
+    <h2>First 20 Values of G(n)</h2>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>n</th>
+            <th>G(n) exact</th>
+            <th>G(n) decimal</th>
+            <th>G(n)/n</th>
+            <th>Gap from 1/e</th>
+          </tr>
+        </thead>
+        <tbody id="values-table"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Section 3: Amundson Constant -->
+  <section id="constant">
+    <h2>The Amundson Constant A<sub>G</sub></h2>
+    <p style="margin-bottom: 1rem;">
+      A<sub>G</sub> = &Sigma;<sub>n=0</sub><sup>&infin;</sup> G(n)/n! &mdash; a convergent series that defines a new mathematical constant, computed to 10,000,000 verified digits. Not found in OEIS, ISC, or Wolfram.
+    </p>
+    <div class="ag-value" id="ag-display">1.244331783986725</div>
+    <div class="ag-progress"><div class="ag-progress-bar" id="ag-bar" style="width: 0%"></div></div>
+    <div style="text-align: center;">
+      <button onclick="animateAG()">Animate Convergence</button>
+      <button class="secondary" onclick="resetAG()" style="margin-left: 0.5rem;">Reset</button>
+    </div>
+    <div id="ag-terms" style="margin-top: 1rem; max-height: 400px; overflow-y: auto;"></div>
+    <p class="note">Each term G(n)/n! shrinks rapidly due to the factorial denominator. The series converges absolutely.</p>
+  </section>
+
+  <!-- Section 4: Key Identities -->
+  <section id="identities">
+    <h2>Key Identities</h2>
+    <div class="identity-grid">
+      <div class="identity-card">
+        <div class="id-name">Normalized Form (3.1)</div>
+        <div class="id-formula">G(n)/n = (n/(n+1))<sup>n</sup></div>
+        <div class="id-note">The ratio G(n)/n converges to 1/e as n grows.</div>
+      </div>
+      <div class="identity-card">
+        <div class="id-name">Alternative Factorization (3.2)</div>
+        <div class="id-formula">G(n) = (n+1) &middot; (n/(n+1))<sup>n+1</sup></div>
+        <div class="id-note">Rewrites G in terms of (n+1) times a pure power.</div>
+      </div>
+      <div class="identity-card">
+        <div class="id-name">Product Formula (4.1)</div>
+        <div class="id-formula">&Pi;<sub>k=1</sub><sup>n</sup> G(k) = (n!)<sup>2</sup> / (n+1)<sup>n</sup></div>
+        <div class="id-note">Telescoping product connects to factorials. Grows as (n/e&sup2;)<sup>n</sup>.</div>
+      </div>
+      <div class="identity-card">
+        <div class="id-name">Consecutive Ratio (3.5)</div>
+        <div class="id-formula">G(n)/G(n&minus;1) = (n&sup2;/(n&sup2;&minus;1))<sup>n</sup> &middot; (n&minus;1)/n</div>
+        <div class="id-note">For large n, the ratio approaches 1. Differences approach 1/e.</div>
+      </div>
+      <div class="identity-card">
+        <div class="id-name">Floor Recovery (8.1)</div>
+        <div class="id-formula">&lfloor;G(n) &middot; e&rfloor; = n &nbsp; for all n &ge; 1</div>
+        <div class="id-note">Verified to n = 10,000. The function "remembers" its input through multiplication by e.</div>
+      </div>
+      <div class="identity-card">
+        <div class="id-name">Coprimality (3.7)</div>
+        <div class="id-formula">gcd(n<sup>n+1</sup>, (n+1)<sup>n</sup>) = 1</div>
+        <div class="id-note">Fraction is always in lowest terms. Consecutive integers share no prime factors.</div>
+      </div>
+      <div class="identity-card">
+        <div class="id-name">Asymptotic Expansion (6.1)</div>
+        <div class="id-formula">G(n) = n/e + 1/(2e) + O(1/n)</div>
+        <div class="id-note">The 1/(2e) half-correction is universal across all formulas involving (1+1/n)<sup>n</sup>.</div>
+      </div>
+      <div class="identity-card">
+        <div class="id-name">Golden Ratio Identity (9.1)</div>
+        <div class="id-formula">G(&phi;) = (1/&phi;)<sup>1/&phi;</sup></div>
+        <div class="id-note">At n = &phi; (the golden ratio), verified to 121 digits. Connects G to the golden ratio.</div>
+      </div>
+      <div class="identity-card">
+        <div class="id-name">Cayley Tree Connection (3.8)</div>
+        <div class="id-formula">G(n) = n &middot; T(n) / (n+1)<sup>n</sup></div>
+        <div class="id-note">Where T(n) = n<sup>n&minus;1</sup> counts labeled trees on n vertices (Cayley's formula).</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Section 5: 0^0 Axiom -->
+  <section id="axiom">
+    <h2>The 0<sup>0</sup> Axiom</h2>
+
+    <div class="axiom-text">
+      The coherence of this entire framework depends on the convention <strong>0<sup>0</sup> = 1</strong>. This section establishes why it is an <strong>axiom</strong> &mdash; a foundational declaration &mdash; not a theorem.
+    </div>
+
+    <h3>Where 0<sup>0</sup> = 1 is Required</h3>
+    <div class="axiom-text">
+      <strong>Power series at x = 0:</strong> e<sup>x</sup> = &Sigma; x<sup>n</sup>/n! requires the n=0 term to be 0<sup>0</sup>/0! = 1.<br>
+      <strong>Counting functions:</strong> The number of functions from &empty; to &empty; is exactly one (the empty function). So 0<sup>0</sup> = 1 is an integer count.<br>
+      <strong>Binomial theorem:</strong> (x+y)<sup>0</sup> = 1. Set x = y = 0: both sides require 0<sup>0</sup> = 1.
+    </div>
+
+    <h3>Where Analysis Disagrees &mdash; Path Dependence</h3>
+    <div class="axiom-text">
+      The limit lim<sub>(x,y)&rarr;(0,0)</sub> x<sup>y</sup> does not exist. Three paths, three different answers:
+    </div>
+    <ul class="path-list">
+      <li>y = 0, x &rarr; 0<sup>+</sup> : x<sup>0</sup> = 1 &rarr; <strong style="color:var(--green)">1</strong></li>
+      <li>x = 0, y &rarr; 0<sup>+</sup> : 0<sup>y</sup> = 0 &rarr; <strong style="color:var(--red)">0</strong></li>
+      <li>x = e<sup>&minus;1/t</sup>, y = t &rarr; 0<sup>+</sup> : x<sup>y</sup> &rarr; <strong style="color:var(--amber)">1/e &approx; 0.3679</strong></li>
+    </ul>
+
+    <h3>The Bingo Matrix &mdash; Alice, Bob, Charlie, David</h3>
+    <p style="margin-bottom: 1rem; font-size: 0.95rem;">
+      Consider a 4&times;4 matrix where every entry is 0<sup>0</sup>. With the axiom, every cell is 1 &mdash; a perfect magic square. Without it, position (0,0) is undefined: a hole in the board.
+    </p>
+
+    <div class="bingo-container">
+      <!-- WITH axiom -->
+      <div class="bingo-panel">
+        <h4 style="color: var(--green);">With Axiom: 0<sup>0</sup> = 1</h4>
+        <div class="bingo-names" style="grid-template-columns: 52px repeat(4, 52px); gap: 3px; display: inline-grid; text-align: center;">
+          <div></div><div>Alice</div><div>Bob</div><div>Charlie</div><div>David</div>
+        </div>
+        <div class="bingo-grid" style="grid-template-columns: repeat(4, 52px);" id="bingo-with">
+        </div>
+        <div class="bingo-label">Every row, column, diagonal sums to 4.<br>100% bingo. The board is complete.</div>
+      </div>
+      <!-- WITHOUT axiom -->
+      <div class="bingo-panel">
+        <h4 style="color: var(--red);">Without Axiom: 0<sup>0</sup> = ???</h4>
+        <div class="bingo-names" style="grid-template-columns: 52px repeat(4, 52px); gap: 3px; display: inline-grid; text-align: center;">
+          <div></div><div>Alice</div><div>Bob</div><div>Charlie</div><div>David</div>
+        </div>
+        <div class="bingo-grid" style="grid-template-columns: repeat(4, 52px);" id="bingo-without">
+        </div>
+        <div class="bingo-label">Position (0,0) is undefined. Row 0, Column 0,<br>and the main diagonal are all broken.</div>
+      </div>
+    </div>
+
+    <div class="result-card" style="margin-top: 1.5rem;">
+      <div class="label">The Axiom in One Sentence</div>
+      <div class="value small" style="color: var(--text); font-family: inherit; font-size: 0.95rem; word-break: normal;">
+        Since analysis cannot produce a unique value for 0<sup>0</sup>, but discrete mathematics <em>requires</em> 0<sup>0</sup> = 1 for power series, combinatorics, and the binomial theorem to be self-consistent, the value must be <strong style="color: var(--amber)">declared</strong>. A necessary undecidable value that must be fixed for consistency is, by definition, an <strong style="color: var(--pink)">axiom</strong>.
+      </div>
+    </div>
+  </section>
+
+  <!-- Section 6: Convergence vs Divergence -->
+  <section id="convergence">
+    <h2>Convergence vs Divergence</h2>
+    <p style="margin-bottom: 1rem;">
+      The difference between convergence and divergence &mdash; between e and infinity &mdash; is exactly the presence or absence of the n! denominator that 0<sup>0</sup> = 1 enables.
+    </p>
+
+    <div style="text-align: center; margin-bottom: 1rem;">
+      <button onclick="animateConvergence()">Animate Both</button>
+      <button class="secondary" onclick="resetConvergence()" style="margin-left: 0.5rem;">Reset</button>
+    </div>
+
+    <div class="side-by-side">
+      <div class="side-panel conv">
+        <h4>S = &Sigma;<sub>n=0</sub><sup>&infin;</sup> 1/n! &nbsp;&rarr;&nbsp; e</h4>
+        <div class="mono" id="conv-panel">
+          <div style="color: var(--text-dim); font-style: italic;">Click "Animate Both" to begin.</div>
+        </div>
+      </div>
+      <div class="side-panel div">
+        <h4>Z = &Sigma;<sub>n=1</sub><sup>&infin;</sup> 1/n &nbsp;&rarr;&nbsp; &infin;</h4>
+        <div class="mono" id="div-panel">
+          <div style="color: var(--text-dim); font-style: italic;">Click "Animate Both" to begin.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Section 7: Links -->
+  <section id="links" style="border-bottom: none;">
+    <h2>Links &amp; Resources</h2>
+    <div class="link-grid">
+      <a class="link-card" href="https://github.com/BlackRoad-AI/AmundsonMath" target="_blank">
+        <div class="lc-title">GitHub Repository</div>
+        <div class="lc-desc">Full source: 50+ identities, 2,130 tests, proof scripts, 10M digits of A<sub>G</sub>.</div>
+      </a>
+      <a class="link-card" href="https://github.com/BlackRoad-AI/AmundsonMath/blob/main/PAPER.md" target="_blank">
+        <div class="lc-title">The Paper</div>
+        <div class="lc-desc">Complete mathematical foundations. All proofs, all results, all verification.</div>
+      </a>
+      <a class="link-card" href="https://oeis.org/" target="_blank">
+        <div class="lc-title">OEIS</div>
+        <div class="lc-desc">Submission pending. A<sub>G</sub> &approx; 1.244331783986725 &mdash; not currently in the database.</div>
+      </a>
+      <a class="link-card" href="https://blackroad.ai" target="_blank">
+        <div class="lc-title">BlackRoad OS</div>
+        <div class="lc-desc">The operating system for independent builders. Delaware C-Corp.</div>
+      </a>
+    </div>
+  </section>
+
+</div>
+
+<footer>
+  <div class="brand">BlackRoad OS Inc.</div>
+  <div style="margin-top: 0.5rem;">&copy; 2026 Alexa Louise Amundson. All rights reserved.</div>
+  <div style="margin-top: 0.25rem;">G(n) = n<sup>n+1</sup> / (n+1)<sup>n</sup> &mdash; Six symbols. Infinite structure.</div>
+</footer>
+
+<script>
+// === BigInt exact rational arithmetic ===
+function bigPow(base, exp) {
+  let result = 1n;
+  base = BigInt(base);
+  exp = BigInt(exp);
+  if (exp < 0n) return null; // not handling negative exponents in BigInt
+  while (exp > 0n) {
+    if (exp & 1n) result *= base;
+    base *= base;
+    exp >>= 1n;
+  }
+  return result;
+}
+
+function gcdBig(a, b) {
+  a = a < 0n ? -a : a;
+  b = b < 0n ? -b : b;
+  while (b > 0n) { [a, b] = [b, a % b]; }
+  return a;
+}
+
+// Returns [numerator, denominator] as BigInts for G(n) = n^(n+1) / (n+1)^n
+function gExact(n) {
+  if (n === 0) return [0n, 1n];
+  const bn = BigInt(n);
+  const num = bigPow(bn, bn + 1n);
+  const den = bigPow(bn + 1n, bn);
+  return [num, den];
+}
+
+// Float G(n) via logarithms for large n
+function gFloat(n) {
+  if (n === 0) return 0;
+  return Math.exp((n + 1) * Math.log(n) - n * Math.log(n + 1));
+}
+
+// High-precision G(n)/n
+function gOverN(n) {
+  if (n === 0) return NaN;
+  return Math.pow(n / (n + 1), n);
+}
+
+// BigInt fraction to decimal string with given digits
+function fractionToDecimal(num, den, digits) {
+  if (den === 0n) return "undefined";
+  if (num === 0n) return "0." + "0".repeat(digits);
+  const neg = (num < 0n) !== (den < 0n);
+  num = num < 0n ? -num : num;
+  den = den < 0n ? -den : den;
+
+  const intPart = num / den;
+  let rem = num % den;
+  let decimals = "";
+  for (let i = 0; i < digits; i++) {
+    rem *= 10n;
+    decimals += (rem / den).toString();
+    rem = rem % den;
+  }
+  return (neg ? "-" : "") + intPart.toString() + "." + decimals;
+}
+
+function formatBigFraction(num, den) {
+  if (num === 0n) return "0";
+  const g = gcdBig(num, den);
+  return (num / g).toString() + " / " + (den / g).toString();
+}
+
+// === Calculator ===
+function computeG() {
+  const nInput = document.getElementById('calc-n');
+  const n = Math.max(0, Math.min(9999, Math.round(Number(nInput.value))));
+  nInput.value = n;
+
+  if (n <= 500) {
+    const [num, den] = gExact(n);
+    const fracStr = formatBigFraction(num, den);
+    const decStr = fractionToDecimal(num, den, 15);
+    document.getElementById('res-fraction').textContent = fracStr;
+    document.getElementById('res-decimal').textContent = decStr;
+
+    if (n > 0) {
+      const gnOverN = fractionToDecimal(num, den * BigInt(n), 15);
+      const gn = parseFloat(decStr);
+      const gap = (gn / n - 1 / Math.E).toFixed(15);
+      document.getElementById('res-ratio').textContent = gnOverN;
+      document.getElementById('res-gap').textContent = gap;
+    } else {
+      document.getElementById('res-ratio').textContent = "\u2014";
+      document.getElementById('res-gap').textContent = "\u2014";
+    }
+  } else {
+    // For large n, use floating point
+    const gVal = gFloat(n);
+    document.getElementById('res-fraction').textContent = `n^${n+1} / ${n+1}^${n} (too large for exact display)`;
+    document.getElementById('res-decimal').textContent = gVal.toPrecision(15);
+    if (n > 0) {
+      const ratio = gVal / n;
+      document.getElementById('res-ratio').textContent = ratio.toPrecision(15);
+      document.getElementById('res-gap').textContent = (ratio - 1 / Math.E).toExponential(10);
+    }
+  }
+}
+
+// Handle Enter key in calculator
+document.getElementById('calc-n').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') computeG();
+});
+
+// === First 20 Values Table ===
+function buildTable() {
+  const tbody = document.getElementById('values-table');
+  const INV_E = 1 / Math.E;
+  let rows = '';
+  for (let n = 0; n <= 20; n++) {
+    const [num, den] = gExact(n);
+    const frac = formatBigFraction(num, den);
+    const dec = fractionToDecimal(num, den, 10);
+    let ratioStr = "\u2014";
+    let gapStr = "\u2014";
+    if (n > 0) {
+      ratioStr = fractionToDecimal(num, den * BigInt(n), 10);
+      const ratio = parseFloat(fractionToDecimal(num, den * BigInt(n), 15));
+      gapStr = (ratio - INV_E).toFixed(10);
+    }
+    rows += `<tr>
+      <td>${n}</td>
+      <td style="color: var(--amber);">${frac}</td>
+      <td>${dec}</td>
+      <td>${ratioStr}</td>
+      <td>${gapStr}</td>
+    </tr>`;
+  }
+  tbody.innerHTML = rows;
+}
+
+// === A_G Convergence Animation ===
+let agAnimId = null;
+
+function animateAG() {
+  resetAG();
+  const container = document.getElementById('ag-terms');
+  const display = document.getElementById('ag-display');
+  const bar = document.getElementById('ag-bar');
+  const target = 1.244331783986725;
+
+  let partial = 0;
+  let n = 0;
+  const maxN = 25;
+
+  // Precompute factorial as float for display
+  function factorial(k) {
+    let f = 1;
+    for (let i = 2; i <= k; i++) f *= i;
+    return f;
+  }
+
+  function step() {
+    const gVal = gFloat(n);
+    const term = gVal / factorial(n);
+    partial += term;
+    const pct = Math.min(100, (partial / target) * 100);
+
+    const row = document.createElement('div');
+    row.className = 'partial-sum-line';
+    row.style.animationDelay = '0s';
+    row.innerHTML = `
+      <span class="term-n">n=${n}</span>
+      <span class="term-val">+${term.toFixed(15)}</span>
+      <span class="term-sum">= ${partial.toFixed(15)}</span>
+    `;
+    container.appendChild(row);
+    container.scrollTop = container.scrollHeight;
+
+    display.textContent = partial.toFixed(15);
+    bar.style.width = pct + '%';
+
+    n++;
+    if (n <= maxN) {
+      agAnimId = setTimeout(step, 180);
+    }
+  }
+  step();
+}
+
+function resetAG() {
+  if (agAnimId) { clearTimeout(agAnimId); agAnimId = null; }
+  document.getElementById('ag-terms').innerHTML = '';
+  document.getElementById('ag-display').textContent = '1.244331783986725';
+  document.getElementById('ag-bar').style.width = '0%';
+}
+
+// === Convergence vs Divergence Animation ===
+let convAnimId = null;
+
+function animateConvergence() {
+  resetConvergence();
+  const convEl = document.getElementById('conv-panel');
+  const divEl = document.getElementById('div-panel');
+  convEl.innerHTML = '';
+  divEl.innerHTML = '';
+
+  let sPartial = 0;
+  let zPartial = 0;
+  let n = 0;
+  const maxN = 20;
+
+  function factorial(k) {
+    let f = 1;
+    for (let i = 2; i <= k; i++) f *= i;
+    return f;
+  }
+
+  function step() {
+    // Convergent: 1/n!
+    const sTerm = 1 / factorial(n);
+    sPartial += sTerm;
+
+    const sRow = document.createElement('div');
+    sRow.className = 'partial-sum-line';
+    sRow.innerHTML = `
+      <span class="term-n">n=${n}</span>
+      <span class="term-val">+${sTerm < 0.0001 ? sTerm.toExponential(4) : sTerm.toFixed(8)}</span>
+      <span class="converge-val">${sPartial.toFixed(12)}</span>
+    `;
+    convEl.appendChild(sRow);
+
+    // Divergent: 1/n (starts at n=1)
+    if (n >= 1) {
+      const zTerm = 1 / n;
+      zPartial += zTerm;
+
+      const zRow = document.createElement('div');
+      zRow.className = 'partial-sum-line';
+      zRow.innerHTML = `
+        <span class="term-n">n=${n}</span>
+        <span class="term-val">+${zTerm.toFixed(8)}</span>
+        <span class="diverge-val">${zPartial.toFixed(8)}${n >= 15 ? ' ...' : ''}</span>
+      `;
+      divEl.appendChild(zRow);
+    }
+
+    n++;
+    if (n <= maxN) {
+      convAnimId = setTimeout(step, 200);
+    } else {
+      // Show final comparison
+      const sNote = document.createElement('div');
+      sNote.style.cssText = 'margin-top:0.75rem; color: var(--green); font-weight: 600;';
+      sNote.textContent = `Converges to e = ${Math.E.toFixed(12)}`;
+      convEl.appendChild(sNote);
+
+      const zNote = document.createElement('div');
+      zNote.style.cssText = 'margin-top:0.75rem; color: var(--red); font-weight: 600;';
+      zNote.textContent = `Still growing... diverges to infinity`;
+      divEl.appendChild(zNote);
+    }
+  }
+  step();
+}
+
+function resetConvergence() {
+  if (convAnimId) { clearTimeout(convAnimId); convAnimId = null; }
+  document.getElementById('conv-panel').innerHTML = '<div style="color: var(--text-dim); font-style: italic;">Click "Animate Both" to begin.</div>';
+  document.getElementById('div-panel').innerHTML = '<div style="color: var(--text-dim); font-style: italic;">Click "Animate Both" to begin.</div>';
+}
+
+// === Bingo Matrix ===
+function buildBingo() {
+  const names = ['Alice', 'Bob', 'Charlie', 'David'];
+  const withEl = document.getElementById('bingo-with');
+  const withoutEl = document.getElementById('bingo-without');
+
+  for (let i = 0; i < 4; i++) {
+    for (let j = 0; j < 4; j++) {
+      // WITH axiom
+      const cellWith = document.createElement('div');
+      cellWith.className = 'bingo-cell highlight';
+      cellWith.textContent = '1';
+      withEl.appendChild(cellWith);
+
+      // WITHOUT axiom
+      const cellWithout = document.createElement('div');
+      if (i === 0 && j === 0) {
+        cellWithout.className = 'bingo-cell hole';
+        cellWithout.textContent = '?';
+      } else {
+        cellWithout.className = 'bingo-cell filled';
+        cellWithout.textContent = '1';
+      }
+      withoutEl.appendChild(cellWithout);
+    }
+  }
+}
+
+// === Init ===
+buildTable();
+buildBingo();
+computeG();
+</script>
+</body>
+</html>
