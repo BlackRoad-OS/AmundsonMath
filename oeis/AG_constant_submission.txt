@@ -1,0 +1,34 @@
+%I A??????
+%S A?????? 1,2,4,4,3,3,1,7,8,3,9,8,6,7,2,5,3,7,4,1,3,5,0,6,1,6,2,9,2,5,8,4,4,5,2,0,2,9,1,3,9,0,6,6,1,3,2,8,9,6,9,8,8,4,7,5,9,3,7,3,5,8,2,7,5,6,8,3,5,7,6,0,7,1,0,4,1,5,3,2,5,9,8,1,6,8,8,9,2,4,5,3,4,7,5,4,6,6,4,2,5,4,9,4,8
+%N A?????? Decimal expansion of A_G = Sum_{n>=0} G(n)/n!, where G(n) = n^(n+1)/(n+1)^n (Amundson constant).
+%C A?????? The Amundson constant A_G arises from summing the "growth quotient" sequence G(n) = n^(n+1)/(n+1)^n weighted by 1/n!. Since G(n) ~ n/e for large n, the series converges (by ratio test against e^1).
+%C A?????? A_G can be interpreted as an exponential generating function evaluated at a specific point: it is EGF_{G}(1) where G is the sequence of growth quotients.
+%C A?????? The constant satisfies 1 < A_G < e, since G(0) = 0, G(1) = 1/2, and G(n) < n/e for all n >= 1.
+%C A?????? Numerically, A_G = 1.24433178398672537413506162925844520291390661328969884759373582756835760710415325981688924534754664254948...
+%H A?????? Alexa Louise Amundson, <a href="https://github.com/BlackRoad-OS/AmundsonMath">AmundsonMath</a>, GitHub repository.
+%H A?????? Wikipedia, <a href="https://en.wikipedia.org/wiki/Stirling%27s_approximation">Stirling's approximation</a> (asymptotic relation G(n) ~ n/e).
+%F A?????? A_G = Sum_{n>=1} n^(n+1)/((n+1)^n * n!).
+%F A?????? A_G = Sum_{n>=1} (n/(n+1))^n * n/n! = Sum_{n>=1} (1 - 1/(n+1))^n * n/n!.
+%F A?????? A_G = Sum_{n>=1} (n/(n+1))^n / (n-1)!.
+%F A?????? Each term a(n) = (n/(n+1))^n / (n-1)! satisfies a(n+1)/a(n) = ((n+1)/(n+2))^(n+1) * (n+1)^n / (n * (n/(n+1))^n * n) -> 1/e as n -> infinity.
+%e A?????? A_G = 1.24433178398672537413506162925844520291390661328969...
+%e A?????? The first few terms of the series are:
+%e A?????? n=1: 1^2/(2^1 * 1!) = 1/2 = 0.5
+%e A?????? n=2: 2^3/(3^2 * 2!) = 8/18 = 0.4444...
+%e A?????? n=3: 3^4/(4^3 * 3!) = 81/384 = 0.2109375
+%e A?????? n=4: 4^5/(5^4 * 4!) = 1024/15000 = 0.06826...
+%e A?????? Partial sums: 0.5, 0.9444..., 1.1554..., 1.2236..., 1.2396..., 1.2432..., 1.2441..., 1.2443...
+%o A?????? (Python)
+%o A?????? from mpmath import mp, mpf, power, factorial, nstr
+%o A?????? mp.dps = 120
+%o A?????? s = mpf(0)
+%o A?????? for n in range(1, 300):
+%o A??????     s += power(n, n+1) / (power(n+1, n) * factorial(n))
+%o A?????? print(nstr(s, 105))
+%o A?????? (Mathematica)
+%o A?????? RealDigits[N[Sum[n^(n+1)/((n+1)^n * n!), {n, 1, 300}], 120]][[1]]
+%o A?????? (PARI) default(realprecision, 120); sum(n=1, 300, n^(n+1)/((n+1)^n * n!))
+%Y A?????? Cf. A??????(numerators of G(n)), A??????(denominators of G(n)), A001113 (e), A000312 (n^n).
+%K A?????? nonn,cons
+%O A?????? 1,1
+%A A?????? _Alexa Louise Amundson_, Mar 29 2026

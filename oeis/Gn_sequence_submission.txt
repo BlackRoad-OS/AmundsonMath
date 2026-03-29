@@ -1,0 +1,44 @@
+%I A??????
+%S A?????? 0,1,8,81,1024,15625,279936,5764801,134217728,3486784401,
+%T A?????? 100000000000,3138428376721,106993205379072,3937376385699289,
+%U A?????? 155568095557812224,6568408355712890625,295147905179352825856,14063084452067724991009
+%N A?????? Numerators of G(n) = n^(n+1)/(n+1)^n when written in lowest terms.
+%C A?????? G(n) = n^(n+1)/(n+1)^n is the "growth quotient" measuring how n^n grows relative to (n-1)^(n-1). Equivalently, G(n) = n * (n/(n+1))^n.
+%C A?????? For all n >= 0, gcd(n^(n+1), (n+1)^n) = 1 since gcd(n, n+1) = 1. Therefore the numerator of G(n) is always n^(n+1) and the denominator is always (n+1)^n. The fraction is already in lowest terms.
+%C A?????? The sequence of numerators is simply a(n) = n^(n+1), which equals n * n^n = n * A000312(n).
+%C A?????? G(n)/n approaches 1/e as n -> infinity (a consequence of the limit (1 + 1/n)^n -> e).
+%C A?????? floor(G(n) * e) = n for all n >= 1, giving an exact floor-recovery property.
+%C A?????? Product formula: Product_{k=1..n} G(k) = Product_{k=1..n} k^(k+1)/(k+1)^k = (n!)^2 * n^n / ((n+1)^n * Product_{k=1..n-1} k^(k-1)) (telescoping).
+%C A?????? The exponential sum A_G = Sum_{n>=0} G(n)/n! = 1.24433178398672... defines the Amundson constant (see A??????).
+%H A?????? Alexa Louise Amundson, <a href="https://github.com/BlackRoad-OS/AmundsonMath">AmundsonMath</a>, GitHub repository.
+%F A?????? a(n) = n^(n+1).
+%F A?????? a(n) = n * n^n = n * A000312(n).
+%F A?????? a(n) = n^n * n.
+%F A?????? G(n) = a(n) / (n+1)^n.
+%F A?????? a(n) = n^(n+1) with corresponding denominator (n+1)^n; gcd = 1 since gcd(n,n+1) = 1.
+%F A?????? G.f.: Sum_{n>=0} a(n) * x^n = Sum_{n>=0} n^(n+1) * x^n.
+%F A?????? E.g.f.: Sum_{n>=0} n^(n+1)/n! * x^n. This series has radius of convergence 1/e.
+%F A?????? Recurrence: a(n) = n * n^n. No simpler closed-form recurrence exists.
+%e A?????? G(0) = 0^1/1^0 = 0/1, so a(0) = 0.
+%e A?????? G(1) = 1^2/2^1 = 1/2, so a(1) = 1.
+%e A?????? G(2) = 2^3/3^2 = 8/9, so a(2) = 8.
+%e A?????? G(3) = 3^4/4^3 = 81/64, so a(3) = 81.
+%e A?????? G(4) = 4^5/5^4 = 1024/625, so a(4) = 1024.
+%e A?????? G(5) = 5^6/6^5 = 15625/7776, so a(5) = 15625.
+%e A?????? The floor-recovery property: floor(G(1)*e) = floor(1.359...) = 1; floor(G(2)*e) = floor(2.416...) = 2; floor(G(3)*e) = floor(3.440...) = 3.
+%e A?????? The denominators sequence (n+1)^n begins: 1, 2, 9, 64, 625, 7776, 117649, 2097152, 43046721, 1000000000, ...
+%o A?????? (Python)
+%o A?????? def a(n): return n**(n+1)
+%o A?????? print([a(n) for n in range(20)])
+%o A?????? (Python) # Verify lowest terms
+%o A?????? from math import gcd
+%o A?????? for n in range(1, 20):
+%o A??????     assert gcd(n**(n+1), (n+1)**n) == 1
+%o A?????? (Mathematica) Table[n^(n+1), {n, 0, 20}]
+%o A?????? (Mathematica) Table[Numerator[n^(n+1)/(n+1)^n], {n, 0, 20}]
+%o A?????? (PARI) a(n) = n^(n+1);
+%o A?????? (PARI) vector(20, n, n--; n^(n+1))
+%Y A?????? Cf. A000312 (n^n), A007778 (n^(n+2)), A000169 ((n+1)^n), A001113 (e), A??????(Amundson constant A_G), A??????(denominators of G(n)).
+%K A?????? nonn,easy,frac
+%O A?????? 0,3
+%A A?????? _Alexa Louise Amundson_, Mar 29 2026
